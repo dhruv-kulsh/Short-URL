@@ -1,6 +1,8 @@
 const express = require("express");
 const path = require("path")
+const cookieParser = require("cookie-parser")
 const { connectToMongoDB } = require("./connect")
+const {restrictToLoggedInUserOnly, checkauth} = require("./middleware/auth")
 
 const urlRoute = require("./routes/url");
 const staticRoute = require("./routes/staticRouter")
@@ -11,9 +13,10 @@ const app = express();
 
 app.use(express.json())
 app.use(express.urlencoded({ extended: false }));
+app.use(cookieParser())
 
-app.use('/', staticRoute)
-app.use("/url", urlRoute);
+app.use("/url", restrictToLoggedInUserOnly, urlRoute);
+app.use('/', checkauth, staticRoute)
 app.use("/user", userRoute)
 
 const PORT = 8000;
